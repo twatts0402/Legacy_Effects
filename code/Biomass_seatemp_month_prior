@@ -1,0 +1,51 @@
+library(tidyverse)
+
+
+biomass <- read_csv("/Users/tobiahwatts/Downloads/biomass_sst.csv")
+
+#turn date into as.date. group by rows with different dates and mean_var_sst
+# Arrange by date. Lag mean_var_sst by 1 and add that info to a new column
+
+monthly_sst <- biomass |> 
+  mutate(date = as.Date(date)) |> 
+  distinct(date, mean_var_sst) |> 
+  arrange(date) |> 
+  mutate(previous_month_sst = lag(mean_var_sst))
+
+#turn date column into as.date. join biomass and monthly_sst by date. 
+# Only include date and prev_month_sst from monthly_sst.
+#get rid of all NA values
+
+biomass_lagged <- biomass |> 
+  mutate(date = as.Date(date)) |> 
+  left_join(
+    monthly_sst |> select(date, previous_month_sst),
+    by = "date"
+  ) |> 
+  filter(!is.na(previous_month_sst))
+
+#linear regression that predicts total_biomass using previous_month_sst, and use the data in biomass_lagged
+#Set variables for p_value and R^2 valued
+
+model <- lm(total_biomass ~ previous_month_sst, data = biomass_lagged)
+model_summary <- summary(model)
+
+r_squared <- model_summary$r.squared
+p_value <- model_summary$coefficients["previous_month_sst", "Pr(>|t|)"]
+
+#plot data with a line of best fit.
+
+ggplot(biomass_lagged, 
+    aes(x = previous_month_sst, 
+        y = total_biomass)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Total Biomass vs Previous Month SST",
+    x = "Previous Month Sea Surface Temperature Anaomaly (°C) ",
+    y = "Total Biomass (g)") +
+      annotate("text", x = Inf, y = Inf,
+    label = paste("R² =", round(r_squared, 3),
+                "\np =", round(p_value, 4)),
+    hjust = 1.2,
+    vjust = 1.2)
