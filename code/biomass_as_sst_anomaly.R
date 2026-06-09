@@ -8,8 +8,8 @@ biomass_data <- read_csv("/Users/tobiahwatts/Downloads/biomass_data_stacked.csv"
 
 biomass_control_tidy <- biomass_data |>
   filter(plot == "C") |>
-  mutate(year = as.numeric(year),
-        month = as.numeric(month)) |> 
+  mutate(year = as.integer(year),
+        month = as.integer(month)) |> 
   group_by(year, month, survey_group, site, plot) |>
   summarise(
     total_biomass = first(plot_biomass),

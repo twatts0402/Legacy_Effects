@@ -41,7 +41,7 @@ ggplot(biomass_lagged,
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(
-    title = "Total Biomass vs Previous Month SST",
+    title = "Total Biomass vs Previous Month SST Anomaly",
     x = "Previous Month Sea Surface Temperature Anaomaly (°C) ",
     y = "Total Biomass (g)") +
       annotate("text", x = Inf, y = Inf,
