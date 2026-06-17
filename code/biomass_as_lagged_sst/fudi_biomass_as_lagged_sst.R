@@ -43,6 +43,7 @@ r_squared <- fudi_lm_sumamry$r.squared
 p_value <- fudi_lm_sumamry$coefficients["previous_month_sst", "Pr(>|t|)"]
 
 #scatter plot with line of best fit, p-value and r^2 annotations.
+#important comment
 
 ggplot(fudi_lagged, aes(x = previous_month_sst, y = fudi_biomass)) +
   geom_point() +
