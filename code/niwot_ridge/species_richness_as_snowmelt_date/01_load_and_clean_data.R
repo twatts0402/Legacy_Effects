@@ -4,7 +4,7 @@ library(tidyverse)
 
 snow_file <- "/Users/tobiahwatts/Desktop/knb-lter-nwt.31.22/saddsnow.dw.data.csv"
 vegetation_file <- "/Users/tobiahwatts/Desktop/knb-lter-nwt.93.10/saddptqd.hh.data.csv"
-output_dir <- "/Users/tobiahwatts/Desktop/snow_vegetation_outputs"
+output_dir <- "/Users/tobiahwatts/Desktop/snowmelt_date_species_richness"
 
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 

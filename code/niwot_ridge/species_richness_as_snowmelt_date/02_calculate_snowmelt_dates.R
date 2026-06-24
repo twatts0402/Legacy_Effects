@@ -2,7 +2,7 @@
 
 library(tidyverse)
 
-output_dir <- "/Users/tobiahwatts/Desktop/snow_vegetation_outputs"
+output_dir <- "/Users/tobiahwatts/Desktop/snowmelt_date_species_richness"
 minimum_snowmelt_doy <- 100
 maximum_snowmelt_doy <- 250
 
