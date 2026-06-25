@@ -2,7 +2,7 @@
 
 library(tidyverse)
 
-output_dir <- "/Users/tobiahwatts/Desktop/snowmelt_date_species_richness"
+output_dir <- "/Users/tobiahwatts/Desktop/SMART OUTPUTS/rolling_snowmelt_species-richness"
 lag_years_to_model <- c(0, 1, 3, 5)
 
 species_richness <- read_csv(
