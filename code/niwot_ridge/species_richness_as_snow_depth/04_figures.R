@@ -2,10 +2,10 @@ library(tidyverse)
 
 # Create summary figures for the rolling snowpack-depth analysis.
 
-output_folder <- "/Users/tobiahwatts/Desktop/Snowpack_depth_vegetation_outputs"
-richness_analysis_data_path <- file.path(output_folder, "04_richness_analysis_data.csv")
-species_analysis_data_path <- file.path(output_folder, "04_species_analysis_data.csv")
-richness_models_path <- file.path(output_folder, "04_richness_models.csv")
+output_folder <- '/Users/tobiahwatts/Desktop/SMART OUTPUTS/Snowpack_depth_vegetation_outputs'
+richness_analysis_data_path <- file.path(output_folder, "03_richness_analysis_data.csv")
+species_analysis_data_path <- file.path(output_folder, "03_species_analysis_data.csv")
+richness_models_path <- file.path(output_folder, "03_richness_models.csv")
 
 dir.create(output_folder, showWarnings = FALSE, recursive = TRUE)
 
@@ -51,7 +51,7 @@ richness_plot <- ggplot(richness_plot_data, aes(x = snow_depth_mean, y = species
   theme_bw()
 
 ggsave(
-  filename = file.path(output_folder, "05_species_richness_rolling_snow_depth.png"),
+  filename = file.path(output_folder, "04_species_richness_rolling_snow_depth.png"),
   plot = richness_plot,
   width = 11,
   height = 7,
@@ -89,7 +89,7 @@ species_plot <- ggplot(species_plot_data, aes(x = snow_depth_mean, y = relative_
   )
 
 ggsave(
-  filename = file.path(output_folder, "05_top_species_relative_cover_rolling_snow_depth.png"),
+  filename = file.path(output_folder, "04_top_species_relative_cover_rolling_snow_depth.png"),
   plot = species_plot,
   width = 14,
   height = 16,

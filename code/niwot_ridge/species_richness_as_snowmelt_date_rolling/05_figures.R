@@ -2,7 +2,7 @@
 
 library(tidyverse)
 
-output_dir <- "/Users/tobiahwatts/Desktop/snowmelt_date_species_richness"
+output_dir <- "/Users/tobiahwatts/Desktop/SMART OUTPUTS/rolling_snowmelt_species-richness"
 
 lag_model_data <- read_csv(
   file.path(output_dir, "03_snowmelt_species_richness_rolling_lag_model_data.csv"),

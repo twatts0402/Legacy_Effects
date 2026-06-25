@@ -5,10 +5,10 @@ library(broom)
 # with rolling mean snowpack depth across current-year, 1-year, 3-year, and
 # 5-year snow-history windows.
 
-output_folder <- "/Users/tobiahwatts/Desktop/Snowpack_depth_vegetation_outputs"
+output_folder <- '/Users/tobiahwatts/Desktop/SMART OUTPUTS/Snowpack_depth_vegetation_outputs'
 vegetation_plot_year_path <- file.path(output_folder, "01_vegetation_plot_year.csv")
 vegetation_species_path <- file.path(output_folder, "01_vegetation_species.csv")
-snow_predictors_path <- file.path(output_folder, "03_snow_predictors.csv")
+snow_predictors_path <- file.path(output_folder, "02_snow_predictors.csv")
 
 dir.create(output_folder, showWarnings = FALSE, recursive = TRUE)
 
@@ -100,10 +100,10 @@ species_models <- species_analysis_data |>
   ungroup() |>
   arrange(snow_window, p_value)
 
-write_csv(richness_analysis_data, file.path(output_folder, "04_richness_analysis_data.csv"))
-write_csv(species_analysis_data, file.path(output_folder, "04_species_analysis_data.csv"))
-write_csv(richness_models, file.path(output_folder, "04_richness_models.csv"))
-write_csv(species_models, file.path(output_folder, "04_species_relative_cover_models.csv"))
+write_csv(richness_analysis_data, file.path(output_folder, "03_richness_analysis_data.csv"))
+write_csv(species_analysis_data, file.path(output_folder, "03_species_analysis_data.csv"))
+write_csv(richness_models, file.path(output_folder, "03_richness_models.csv"))
+write_csv(species_models, file.path(output_folder, "03_species_relative_cover_models.csv"))
 
 print(richness_models)
 print(species_models)

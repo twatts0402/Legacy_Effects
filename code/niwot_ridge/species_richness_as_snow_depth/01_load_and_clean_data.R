@@ -3,9 +3,9 @@ library(tidyverse)
 # Load the Saddle Grid snow-depth and vegetation point-intercept data, clean the
 # core fields, and save reusable plot-year vegetation and snow summaries.
 
-snow_path <- "/Users/tobiahwatts/Desktop/knb-lter-nwt.31.22/saddsnow.dw.data.csv"
-vegetation_path <- "/Users/tobiahwatts/Desktop/knb-lter-nwt.93.10/saddptqd.hh.data.csv"
-output_folder <- "/Users/tobiahwatts/Desktop/Snowpack_depth_vegetation_outputs"
+snow_path <- "/Users/tobiahwatts/Desktop/SMART DATA/knb-lter-nwt.31.22/saddsnow.dw.data.csv"
+vegetation_path <- "/Users/tobiahwatts/Desktop/SMART DATA/knb-lter-nwt.93.10/saddptqd.hh.data.csv"
+output_folder <- '/Users/tobiahwatts/Desktop/SMART OUTPUTS/Snowpack_depth_vegetation_outputs'
 
 dir.create(output_folder, showWarnings = FALSE, recursive = TRUE)
 
