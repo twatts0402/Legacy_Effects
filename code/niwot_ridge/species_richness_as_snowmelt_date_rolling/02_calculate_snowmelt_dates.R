@@ -3,57 +3,56 @@
 library(tidyverse)
 
 output_dir <- "/Users/tobiahwatts/Desktop/SMART OUTPUTS/rolling_snowmelt_species-richness"
+
+#values outside of these are errors
 minimum_snowmelt_doy <- 100
 maximum_snowmelt_doy <- 250
 
 snow_depth <- read_csv(
   file.path(output_dir, "01_clean_snow_depth_by_plot_year.csv"),
-  show_col_types = FALSE
-)
+  show_col_types = FALSE)
 
+#new table with snowpack max depth per year
 snowpack_peaks <- snow_depth |>
   arrange(plot, snow_year, date) |>
   group_by(plot, snow_year) |>
   filter(snow_depth_cm == max(snow_depth_cm, na.rm = TRUE)) |>
-  slice(1) |>
+  slice(1) |> #keeps 1 row per year
   ungroup() |>
   transmute(
     plot,
     snowmelt_year = snow_year,
     peak_date = date,
-    peak_snow_depth_cm = snow_depth_cm
-  )
+    peak_snow_depth_cm = snow_depth_cm)
 
-# Snowmelt is only searched for after the seasonal snowpack peak. This prevents
-# winter or early-season zero-snow observations from being counted as snowmelt
-# when snow later accumulates.
+# creates a new table with all previous information, estimates snowmelt date as halfway between observations
 snowmelt_dates <- snow_depth |>
   rename(snowmelt_year = snow_year) |>
   inner_join(snowpack_peaks, by = c("plot", "snowmelt_year")) |>
   filter(
-    date >= peak_date,
+    date >= peak_date,     # when estimating snowmelt date, only use days after peak_date
     peak_snow_depth_cm > 0
   ) |>
   arrange(plot, snowmelt_year, date) |>
   group_by(plot, snowmelt_year) |>
   mutate(
-    previous_date = lag(date),
-    previous_snow_depth_cm = lag(snow_depth_cm),
-    positive_to_zero = previous_snow_depth_cm > 0 & snow_depth_cm == 0
+    last_snow_present_date = lag(date),
+    last_snow_present_depth_cm = lag(snow_depth_cm),
+    positive_to_zero = last_snow_present_depth_cm > 0 & snow_depth_cm == 0
   ) |>
   filter(positive_to_zero) |>
-  slice_max(date, n = 1, with_ties = FALSE) |>
+  slice_max(date, n = 1, with_ties = FALSE) |> #uses most-recent 0 snow. If plot were to clear then be snowed on again. 
   ungroup() |>
   mutate(
-    crossing_fraction = if_else(
-      snow_depth_cm == previous_snow_depth_cm,
-      1,
-      previous_snow_depth_cm / (previous_snow_depth_cm - snow_depth_cm)
-    ),
-    estimated_snowmelt_date = previous_date + round(as.numeric(date - previous_date) * crossing_fraction),
+    first_snow_free_date = date,
+    first_snow_free_depth_cm = snow_depth_cm,
+    snowmelt_window_days = as.numeric(first_snow_free_date - last_snow_present_date),
+    estimated_snowmelt_date = last_snow_present_date + round(snowmelt_window_days / 2), #date halfway between last measured snow date and first 0 snow date
     day_of_year_snowmelt = yday(estimated_snowmelt_date),
-    gap_days = as.numeric(date - previous_date),
-    quality_flag = "good"
+    quality_flag = case_when(                 # sets quality flags if days between is too high
+      snowmelt_window_days <= 25 ~ "good",
+      snowmelt_window_days <= 35 ~ "moderate",
+      TRUE ~ "uncertain")
   ) |>
   filter(
     day_of_year_snowmelt >= minimum_snowmelt_doy,
@@ -64,15 +63,14 @@ snowmelt_dates <- snow_depth |>
     snowmelt_year,
     peak_date,
     peak_snow_depth_cm,
-    previous_date,
-    previous_snow_depth_cm,
-    first_zero_date = date,
-    first_zero_depth_cm = snow_depth_cm,
+    last_snow_present_date,
+    last_snow_present_depth_cm,
+    first_snow_free_date,
+    first_snow_free_depth_cm,
     estimated_snowmelt_date,
     day_of_year_snowmelt,
-    gap_days,
-    quality_flag
-  ) |>
+    snowmelt_window_days,
+    quality_flag) |>
   arrange(snowmelt_year, plot)
 
 write_csv(

@@ -9,12 +9,14 @@ lag_model_data <- read_csv(
   show_col_types = FALSE
 )
 
+#fits a LM per lag
 fit_one_lag <- function(data) {
   model <- lm(species_richness ~ rolling_mean_snowmelt_doy, data = data)
   model_summary <- summary(model)
   coefficient_table <- model_summary$coefficients
   confint_table <- confint(model)
 
+  #takes results of lm and returns them as tidy tibble with listed columns
   tibble(
     lag_years = first(data$lag_years),
     n = nrow(data),
@@ -31,6 +33,7 @@ fit_one_lag <- function(data) {
   )
 }
 
+#runs function above for each value of lag_years
 model_results <- lag_model_data |>
   group_by(lag_years) |>
   group_split() |>
@@ -40,9 +43,9 @@ model_results <- lag_model_data |>
 
 write_csv(
   model_results,
-  file.path(output_dir, "04_lag_model_results.csv")
-)
+  file.path(output_dir, "04_lag_model_results.csv"))
 
+#writes a plain text (txt) file that gives relevant statistical data for each lag year. (not super important)
 summary_lines <- lag_model_data |>
   group_by(lag_years) |>
   group_split() |>

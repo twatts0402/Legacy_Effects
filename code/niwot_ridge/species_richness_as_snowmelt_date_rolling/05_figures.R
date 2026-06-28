@@ -14,79 +14,34 @@ model_results <- read_csv(
   show_col_types = FALSE
 )
 
+#creates a clean labeled data table with needed info and labels for lag_years
 plot_data <- lag_model_data |>
   mutate(
     lag_label = case_when(
       lag_years == 0 ~ "Current year",
       lag_years == 1 ~ "Previous 1 year",
-      TRUE ~ paste0("Previous ", lag_years, " years")
-    ),
+      TRUE ~ paste0("Previous ", lag_years, " years")),
     lag_label = factor(
       lag_label,
-      levels = c("Current year", "Previous 1 year", "Previous 3 years", "Previous 5 years")
-    )
-  )
+      levels = c("Current year", "Previous 1 year", "Previous 3 years", "Previous 5 years"))) #creates fixed display order
 
+#creates plotting labels for model_results table
 plot_labels <- model_results |>
   mutate(
     lag_label = case_when(
       lag_years == 0 ~ "Current year",
       lag_years == 1 ~ "Previous 1 year",
-      TRUE ~ paste0("Previous ", lag_years, " years")
+      TRUE ~ paste0("Previous ", lag_years, " years") #makes a nicer to read format name
     ),
     lag_label = factor(
       lag_label,
-      levels = c("Current year", "Previous 1 year", "Previous 3 years", "Previous 5 years")
+      levels = c("Current year", "Previous 1 year", "Previous 3 years", "Previous 5 years") #creates fixed display order
     ),
-    label = paste0(
+    label = paste0( #annotation label
       "R^2 = ", round(r_squared, 3),
-      "\np = ", format.pval(p_value, digits = 3, eps = 0.001)
-    )
-  )
+      "\np = ", format.pval(p_value, digits = 3, eps = 0.001)))
 
-plot_one_lag <- function(lag_years_to_plot) {
-  data_one_lag <- plot_data |>
-    filter(lag_years == lag_years_to_plot)
-
-  label_one_lag <- plot_labels |>
-    filter(lag_years == lag_years_to_plot)
-
-  lag_title <- as.character(first(data_one_lag$lag_label))
-
-  ggplot(data_one_lag, aes(x = rolling_mean_snowmelt_doy, y = species_richness)) +
-    geom_point(color = "#2f6f73", alpha = 0.75, size = 1.8) +
-    geom_smooth(method = "lm", se = TRUE, color = "#b23a48", linewidth = 1) +
-    annotate(
-      "text",
-      x = Inf,
-      y = Inf,
-      label = label_one_lag$label,
-      hjust = 1.1,
-      vjust = 1.4,
-      size = 5,
-      color = "#222222"
-    ) +
-    labs(
-      title = paste("Species richness by rolling snowmelt date:", lag_title),
-      x = "Rolling mean snowmelt date (day of year)",
-      y = "Species richness"
-    ) +
-    theme_minimal(base_size = 13)
-}
-
-unique(plot_data$lag_years) |>
-  walk(\(lag_years_to_plot) {
-    figure <- plot_one_lag(lag_years_to_plot)
-
-    ggsave(
-      filename = file.path(output_dir, paste0("05_lag_", lag_years_to_plot, "_regression.png")),
-      plot = figure,
-      width = 9,
-      height = 6,
-      dpi = 200
-    )
-  })
-
+#creates the 4-panel graphs =in one file, 4 graphs one for each lag
 combined_plot <- plot_data |>
   ggplot(aes(x = rolling_mean_snowmelt_doy, y = species_richness)) +
   geom_point(color = "#2f6f73", alpha = 0.55, size = 1.4) +
@@ -113,8 +68,7 @@ ggsave(
   plot = combined_plot,
   width = 11,
   height = 8,
-  dpi = 200
-)
+  dpi = 200)
 
 cat("Step 05 complete.\n")
 cat("Figures written to:", output_dir, "\n")
