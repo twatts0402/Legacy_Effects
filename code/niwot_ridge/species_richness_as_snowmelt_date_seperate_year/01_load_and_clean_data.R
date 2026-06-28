@@ -11,17 +11,14 @@ dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 snow_raw <- read_csv(
   snow_file,
   na = c("NA", "", "NaN"),
-  show_col_types = FALSE
-)
+  show_col_types = FALSE)
 
 vegetation_raw <- read_csv(
   vegetation_file,
   na = c("NA", ""),
-  show_col_types = FALSE
-)
+  show_col_types = FALSE)
 
-# Codes beginning with "2" are non-species surface/marker categories
-# such as bare ground, rock fragments, litter, moss/lichen groups, and markers.
+# Codes beginning with "2" are non-species surface/marker categories, it filters thme out
 species_richness <- vegetation_raw |>
   filter(
     !is.na(USDA_code),
@@ -35,8 +32,8 @@ species_richness <- vegetation_raw |>
   ) |>
   arrange(vegetation_year, plot)
 
-# Assign snow-year so fall/winter measurements from Sep-Dec are attached to the
-# following calendar year's melt season. Example: Dec 2005 belongs to snow-year 2006.
+#makes new snow_depth table
+#defines a snow year as september onward. So if it snows sept 2024, thats part of 2025 snow year.
 snow_depth <- snow_raw |>
   mutate(
     date = ymd(date),

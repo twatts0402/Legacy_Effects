@@ -14,10 +14,12 @@ model_results <- read_csv(
   show_col_types = FALSE
 )
 
+#takes all the columns from lag_model_data that end with _doy and stores them
 snowmelt_predictors <- lag_model_data |>
   select(ends_with("_doy")) |>
   names()
 
+#creates a tibble with each row being name from above then creates a more readble predictor_label
 predictor_labels <- tibble(term = snowmelt_predictors) |>
   mutate(
     predictor_label = case_when(
@@ -28,9 +30,9 @@ predictor_labels <- tibble(term = snowmelt_predictors) |>
         str_replace("_", " ") |>
         paste("year")
     ),
-    predictor_label = factor(predictor_label, levels = predictor_label)
-  )
+    predictor_label = factor(predictor_label, levels = predictor_label)) #gives order names should be in
 
+#makes table longer by adding columns from snowmelt_predictors, joins with predictor_labels
 plot_data <- lag_model_data |>
   pivot_longer(
     cols = all_of(snowmelt_predictors),
@@ -39,11 +41,12 @@ plot_data <- lag_model_data |>
   ) |>
   left_join(predictor_labels, by = "term")
 
+#creates a scatter plot relating snowmelt_doy to species richness
 scatter_plot <- plot_data |>
   ggplot(aes(x = snowmelt_doy, y = species_richness)) +
   geom_point(color = "#2f6f73", alpha = 0.55, size = 1.4) +
   geom_smooth(method = "lm", se = TRUE, color = "#b23a48", linewidth = 0.9) +
-  facet_wrap(~ predictor_label, ncol = 2) +
+  facet_wrap(~ predictor_label, ncol = 2) + #puts graphs for each lag year next to eachother in same file
   labs(
     title = "Species richness by snowmelt date for each lag year",
     x = "Snowmelt date (day of year)",
@@ -59,6 +62,7 @@ ggsave(
   dpi = 200
 )
 
+#defines annotations for next graph
 coefficient_plot_data <- model_results |>
   filter(term != "(Intercept)") |>
   left_join(predictor_labels, by = "term") |>
@@ -67,6 +71,7 @@ coefficient_plot_data <- model_results |>
     p_label = paste0("p = ", format.pval(p_value, digits = 3, eps = 0.001))
   )
 
+#creates vline plot showing range of Estimated change in species richness per snowmelt DOY
 coefficient_plot <- coefficient_plot_data |>
   ggplot(aes(x = estimate, y = predictor_label)) +
   geom_vline(xintercept = 0, color = "#666666", linetype = "dashed") +
@@ -76,7 +81,7 @@ coefficient_plot <- coefficient_plot_data |>
     color = "#2f6f73",
     linewidth = 0.9
   ) +
-  geom_point(color = "#b23a48", size = 2.8) +
+  geom_point(color = "#b23a48", size = 2.8) + #shows a point for average change in species richness per snowmelt DOY
   geom_text(
     aes(label = p_label),
     nudge_y = 0.28,
