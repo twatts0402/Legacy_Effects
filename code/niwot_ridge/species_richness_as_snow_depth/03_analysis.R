@@ -18,7 +18,8 @@ vegetation_plot_year <- read_csv(vegetation_plot_year_path, show_col_types = FAL
 vegetation_species <- read_csv(vegetation_species_path, show_col_types = FALSE)
 
 #identifies important species im wanting to do analysis on
-selected_species <- c("FEBR", "POBI6", "SIPR", "LLSE")
+selected_species <- c("ARSC", "FEBR", "GEROT", "POBI6", "MIOB2", 
+                      "ERSI3", "DECE", "TRPAP", "POARG", "CAOC4")
 
 # Lookup table used to keep lag IDs, model column names, and plot/table labels
 snow_lag_predictors <- tribble(
