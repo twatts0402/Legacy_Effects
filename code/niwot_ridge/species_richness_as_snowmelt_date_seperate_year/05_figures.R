@@ -41,16 +41,65 @@ plot_data <- lag_model_data |>
   ) |>
   left_join(predictor_labels, by = "term")
 
-#creates a scatter plot relating snowmelt_doy to species richness
-scatter_plot <- plot_data |>
-  ggplot(aes(x = snowmelt_doy, y = species_richness)) +
-  geom_point(color = "#2f6f73", alpha = 0.55, size = 1.4) +
-  geom_smooth(method = "lm", se = TRUE, color = "#b23a48", linewidth = 0.9) +
+model_formula <- reformulate(
+  termlabels = snowmelt_predictors,
+  response = "species_richness"
+)
+
+snowmelt_lag_model <- lm(model_formula, data = lag_model_data)
+
+#creates marginal effects line of best fit
+make_marginal_predictions <- function(data, model, n_points = 100) {
+  map_dfr(snowmelt_predictors, \(focal_predictor) {
+    focal_values <- seq(
+      min(data[[focal_predictor]], na.rm = TRUE),
+      max(data[[focal_predictor]], na.rm = TRUE),
+      length.out = n_points
+    )
+
+    newdata <- map_dfc(snowmelt_predictors, \(predictor) {
+      if (predictor == focal_predictor) {
+        tibble(!!predictor := focal_values)
+      } else {
+        tibble(!!predictor := rep(mean(data[[predictor]], na.rm = TRUE), n_points))
+      }
+    })
+
+    predict(model, newdata = newdata, interval = "confidence") |>
+      as_tibble() |>
+      bind_cols(
+        tibble(
+          term = focal_predictor,
+          snowmelt_doy = newdata[[focal_predictor]]
+        )
+      )
+  }) |>
+    left_join(predictor_labels, by = "term")
+}
+
+marginal_predictions <- make_marginal_predictions(
+  data = lag_model_data,
+  model = snowmelt_lag_model
+)
+
+#creates a marginal effects plot relating snowmelt_doy to species richness
+scatter_plot <- marginal_predictions |>
+  ggplot(aes(x = snowmelt_doy, y = fit)) +
+  geom_point(
+    data = plot_data,
+    aes(x = snowmelt_doy, y = species_richness),
+    color = "#2f6f73",
+    alpha = 0.28,
+    size = 1.4,
+    inherit.aes = FALSE
+  ) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), fill = "#b23a48", alpha = 0.16) +
+  geom_line(color = "#b23a48", linewidth = 0.9) +
   facet_wrap(~ predictor_label, ncol = 2) + #puts graphs for each lag year next to eachother in same file
   labs(
-    title = "Species richness by snowmelt date for each lag year",
+    title = "Marginal effects of snowmelt date for each lag year",
     x = "Snowmelt date (day of year)",
-    y = "Species richness"
+    y = "Predicted species richness"
   ) +
   theme_minimal(base_size = 13)
 
@@ -100,8 +149,7 @@ ggsave(
   plot = coefficient_plot,
   width = 9,
   height = 6,
-  dpi = 200
-)
+  dpi = 200)
 
 cat("Step 05 complete.\n")
 cat("Figures written to:", output_dir, "\n")
